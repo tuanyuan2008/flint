@@ -1,6 +1,7 @@
 from typing import List, Dict, Optional, Any
 from playwright.async_api import async_playwright, Browser, Page
 from section import Section
+import re
 
 
 class SectionDetector:
@@ -198,7 +199,8 @@ class SectionDetector:
             else:
                 # Check for significant vertical gap (whitespace)
                 current_bottom = (
-                    current_section["bounds"]["top"] + current_section["bounds"]["height"]
+                    current_section["bounds"]["top"]
+                    + current_section["bounds"]["height"]
                 )
                 gap = rect["top"] - current_bottom
 
@@ -208,7 +210,8 @@ class SectionDetector:
                 elif gap > 50:
                     # Check if this element is significantly different from current section
                     current_center = (
-                        current_section["bounds"]["left"] + current_section["bounds"]["width"] / 2
+                        current_section["bounds"]["left"]
+                        + current_section["bounds"]["width"] / 2
                     )
                     element_center = rect["left"] + rect["width"] / 2
                     horizontal_distance = abs(current_center - element_center)
@@ -221,7 +224,9 @@ class SectionDetector:
                         should_start_new_section = True
 
                 # Also check if this element has significantly different content type
-                current_has_media = current_section["hasImages"] or current_section["hasVideos"]
+                current_has_media = (
+                    current_section["hasImages"] or current_section["hasVideos"]
+                )
                 element_has_media = element["hasImages"] or element["hasVideos"]
 
                 if current_has_media != element_has_media and (
@@ -235,7 +240,10 @@ class SectionDetector:
 
             if should_start_new_section:
                 # Save current section if it has meaningful content
-                if current_section is not None and current_section.get("elementCount", 0) > 0:
+                if (
+                    current_section is not None
+                    and current_section.get("elementCount", 0) > 0
+                ):
                     # Only add sections with substantial content
                     content = current_section.get("content", "")
                     has_images = current_section.get("hasImages", False)
@@ -287,16 +295,22 @@ class SectionDetector:
                             )
                             current_section["bounds"]["width"] = max(
                                 current_section["bounds"]["width"],
-                                rect["left"] + rect["width"] - current_section["bounds"]["left"],
+                                rect["left"]
+                                + rect["width"]
+                                - current_section["bounds"]["left"],
                             )
                             current_section["bounds"]["height"] = max(
                                 current_section["bounds"]["height"],
-                                rect["top"] + rect["height"] - current_section["bounds"]["top"],
+                                rect["top"]
+                                + rect["height"]
+                                - current_section["bounds"]["top"],
                             )
 
                             # Update content
                             if element["textContent"].strip():
-                                current_section["content"] += " " + element["textContent"].strip()
+                                current_section["content"] += (
+                                    " " + element["textContent"].strip()
+                                )
                             current_section["hasImages"] = (
                                 current_section["hasImages"] or element["hasImages"]
                             )
@@ -314,7 +328,7 @@ class SectionDetector:
             ):
                 sections.append(current_section)
 
-        # Post-process: merge very close sections and remove duplicates
+        # Post-process: merge very close sections and remove dupes
         return self._merge_close_sections(sections)
 
     def _merge_close_sections(self, sections: List[Dict]) -> List[Dict]:
@@ -338,20 +352,36 @@ class SectionDetector:
                 current_bottom = current["bounds"]["top"] + current["bounds"]["height"]
                 gap = next_section["bounds"]["top"] - current_bottom
 
-                # Merge if gap is small (< 30px) and sections are similar
+                # Merge if visual gap is small (< 30px) and sections are like
                 if gap < 30:
-                    # Merge the sections
                     merged_section["bounds"]["height"] = (
                         next_section["bounds"]["top"]
                         + next_section["bounds"]["height"]
                         - merged_section["bounds"]["top"]
                     )
                     merged_section["bounds"]["width"] = max(
-                        merged_section["bounds"]["width"], next_section["bounds"]["width"]
+                        merged_section["bounds"]["width"],
+                        next_section["bounds"]["width"],
                     )
 
-                    # TODO: how to validly merge HTML elements?
-                    merged_section["elements"] += next_section["elements"]
+                    # Merge elements while preserving order and removing contained elements
+                    merged_elements = merged_section["elements"].copy()
+
+                    for new_element in next_section["elements"]:
+                        # Check if this element is already contained within any existing element
+                        is_contained = False
+                        for existing_element in merged_elements:
+                            if self._is_element_contained_in_html(
+                                new_element, existing_element
+                            ):
+                                is_contained = True
+                                break
+
+                        # Only add if not contained and not an exact dupe
+                        if not is_contained and new_element not in merged_elements:
+                            merged_elements.append(new_element)
+
+                    merged_section["elements"] = merged_elements
                     merged_section["elementCount"] = len(merged_section["elements"])
                     merged_section["content"] += " " + next_section["content"]
                     merged_section["hasImages"] = (
@@ -370,6 +400,48 @@ class SectionDetector:
 
         return merged
 
+    def _is_element_contained_in_html(
+        self, element1_html: str, element2_html: str
+    ) -> bool:
+        """Check if element1 is contained within element2 based on HTML structure"""
+        # Check for complete containment
+        if element1_html in element2_html and element1_html != element2_html:
+            return True
+
+        # Check for partial containment by comparing tag structures
+        if self._are_elements_similar(element1_html, element2_html):
+            return len(element1_html) < len(element2_html)
+
+        return False
+
+    def _are_elements_similar(self, html1: str, html2: str) -> bool:
+        """Check if two HTML elements are similar (same tag, similar content)"""
+        # Extract tag names
+        tag1 = self._extract_tag_name(html1)
+        tag2 = self._extract_tag_name(html2)
+
+        # If same tag, check if content is nested
+        if tag1 and tag2 and tag1 == tag2:
+            # Extract text content (simplified)
+            text1 = self._extract_text_content(html1)
+            text2 = self._extract_text_content(html2)
+
+            # Check if one is contained within the other
+            if text1 in text2 or text2 in text1:
+                return True
+
+        return False
+
+    def _extract_tag_name(self, html: str) -> Optional[str]:
+        """Extract the tag name from HTML string"""
+        match = re.match(r"<(\w+)", html.strip())
+        return match.group(1) if match else None
+
+    def _extract_text_content(self, html: str) -> str:
+        """Extract text content from HTML (simplified)"""
+        text = re.sub(r"<[^>]+>", "", html)
+        return text.strip()
+
     def _has_significant_styling(self, styles: Dict) -> bool:
         """Detect if element has styling that suggests section separation"""
         return (
@@ -387,12 +459,17 @@ class SectionDetector:
         border_top = styles["borderTop"]
         border_bottom = styles["borderBottom"]
 
-        # Look for solid borders with significant thickness
         return (
             "solid" in border_top
-            and any(color in border_top.lower() for color in ["red", "#ff0000", "rgb(255,0,0)"])
+            and any(
+                color in border_top.lower()
+                for color in ["red", "#ff0000", "rgb(255,0,0)"]
+            )
             or "solid" in border_bottom
-            and any(color in border_bottom.lower() for color in ["red", "#ff0000", "rgb(255,0,0)"])
+            and any(
+                color in border_bottom.lower()
+                for color in ["red", "#ff0000", "rgb(255,0,0)"]
+            )
         )
 
     def _create_section_objects(self, sections_data: List[Dict]) -> List[Section]:
@@ -444,7 +521,9 @@ class SectionDetector:
             return "footer"
 
         # Hero section detection
-        if bounds["height"] > 300 and (section_data["hasImages"] or section_data["hasVideos"]):
+        if bounds["height"] > 300 and (
+            section_data["hasImages"] or section_data["hasVideos"]
+        ):
             return "hero"
 
         # Content section

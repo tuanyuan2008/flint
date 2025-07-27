@@ -18,8 +18,9 @@ class Section:
         if not self.html_elements:
             return ""
 
-        # Create a proper HTML structure
-        html_parts = [f'<div class="section section-{self.type}" data-section-id="{self.id}">']
+        html_parts = [
+            f'<div class="section section-{self.type}" data-section-id="{self.id}">'
+        ]
         html_parts.extend(self.html_elements)
         html_parts.append("</div>")
         return "\n".join(html_parts)
@@ -29,8 +30,9 @@ class Section:
         if not self.html_elements:
             return ""
 
-        # Create a proper HTML structure with wrapper
-        html_parts = [f'<div class="section section-{self.type}" data-section-id="{self.id}">']
+        html_parts = [
+            f'<div class="section section-{self.type}" data-section-id="{self.id}">'
+        ]
         html_parts.extend(self.html_elements)
         html_parts.append("</div>")
 
@@ -42,7 +44,6 @@ class Section:
         indent_level = 0
 
         for element in elements:
-            # Simple indentation logic
             if element.strip().startswith("</"):
                 indent_level -= 1
 
