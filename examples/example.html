@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Example Website with Clear Sections</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .nav {
+            background-color: #333;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .nav a:hover {
+            background-color: #555;
+        }
+        
+        .hero {
+            background-color: #f8f9fa;
+            padding: 4rem 2rem;
+            text-align: center;
+            border-bottom: 3px solid #ff0000;
+        }
+        
+        .hero h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+        
+        .main-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            height: fit-content;
+        }
+        
+        .sidebar h3 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .sidebar li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 2rem;
+            border-top: 3px solid #ff0000;
+        }
+        
+        .cta-button {
+            background-color: #007bff;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .cta-button:hover {
+            background-color: #0056b3;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .feature-card {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .feature-card h3 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Flint Section Detector</h1>
+        <p>Advanced web page section analysis for AI applications</p>
+    </header>
+
+    <nav class="nav">
+        <a href="#home">Home</a>
+        <a href="#features">Features</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+    </nav>
+
+    <section class="hero">
+        <h2>Transform Web Pages into Manageable Sections</h2>
+        <p>Our advanced algorithm identifies visual sections in web pages based on whitespace separation and content analysis, making complex websites manageable for AI processing.</p>
+        <button class="cta-button">Get Started</button>
+    </section>
+
+    <div class="content">
+        <main class="main-content">
+            <h2>How It Works</h2>
+            <p>The Section Detector uses sophisticated algorithms to analyze web page layouts and identify distinct sections. By focusing on visual separation, content analysis, and layout patterns, we can break down complex websites into manageable components.</p>
+            
+            <p>Our approach considers multiple factors including whitespace thresholds, content significance, and styling patterns to accurately identify section boundaries. This makes it possible to process large websites efficiently for AI applications.</p>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>Visual Analysis</h3>
+                    <p>Analyzes actual rendered layout and spacing</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Content Recognition</h3>
+                    <p>Identifies text, images, and video content</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Smart Classification</h3>
+                    <p>Automatically categorizes section types</p>
+                </div>
+            </div>
+        </main>
+
+        <aside class="sidebar">
+            <h3>Quick Links</h3>
+            <ul>
+                <li>Documentation</li>
+                <li>API Reference</li>
+                <li>Examples</li>
+                <li>GitHub Repository</li>
+                <li>Support</li>
+            </ul>
+            
+            <h3>Recent Updates</h3>
+            <ul>
+                <li>Enhanced section detection</li>
+                <li>Improved performance</li>
+                <li>New API endpoints</li>
+                <li>Better documentation</li>
+            </ul>
+        </aside>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 Flint Section Detector. All rights reserved.</p>
+        <p>Privacy Policy | Terms of Service | Contact Us</p>
+    </footer>
+</body>
+</html> 
